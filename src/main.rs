@@ -34,17 +34,20 @@ impl eframe::App for MyApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Expression");
-            ui.label(&self.source);
+            ui.add(
+                egui::TextEdit::singleline(&mut self.source)
+                    .hint_text("Expression"),
+            );
+            if ui.button("Run").clicked() {
+                let mut parser = Parser::new(&self.source);
+                parser.expr();
+                self.interpreter = Interpreter::new(parser.instructions);
+                self.last_update = now;
+            }
+
             ui.add_space(10.0);
             ui.heading("Stack Machine");
             ui.columns(2, |cols| {
-                // for (i, col) in cols.iter_mut().enumerate() {
-                //     // col.label(format!("Column {} out of {}", i + 1, 2));
-                //     // // if i + 1 == 2 && col.button("Delete this").clicked() {
-                //     // //     //
-                //     // // }
-                //     if
-                // }
                 cols[0].label("Instructions");
                 cols[0].add_space(10.0);
                 for (i, instruction) in
@@ -91,12 +94,10 @@ impl eframe::App for MyApp {
 }
 
 fn main() {
-    let input = fs::read_to_string("input.txt").expect("Can't read file");
+    let input = String::from("(6 * 6 - 4) * 4"); //fs::read_to_string("input.txt").expect("Can't read file");
     let mut parser = Parser::new(&input);
     parser.expr();
-    let mut interpreter = Interpreter::new(parser.instructions);
-    // let answer = interpreter.run();
-    // println!("{}", answer);
+    let interpreter = Interpreter::new(parser.instructions);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -108,9 +109,6 @@ fn main() {
         "Stack machine",
         options,
         Box::new(|_cc| {
-            // This gives us image support:
-            // egui_extras::install_image_loaders(&cc.egui_ctx);
-
             Ok(Box::new(MyApp {
                 interpreter,
                 last_update: Instant::now(),
