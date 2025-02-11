@@ -5,13 +5,23 @@ pub enum Token {
     Subtract,
     Multiply,
     Divide,
-    Modulo,
-    Exponent,
+    // Modulo,
+    // Exponent,
     LeftParen,
     RightParen,
-    Return,
+    // Return,
     Semicolon,
-    Var,
+    // Var,
     Equals,
-    EOF
+    EOF,
+}
+
+#[derive(Debug)]
+pub enum Instruction {
+    Push(i32),
+    Pop,
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
 }

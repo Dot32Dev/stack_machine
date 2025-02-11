@@ -1,11 +1,12 @@
 use eframe::egui::ahash::HashMapExt;
 
-use crate::{lexer::Lexer, token::Token};
-use std::collections::HashMap;
+use crate::{lexer::Lexer, token::Instruction, token::Token};
+// use std::collections::HashMap;
 
 pub struct Parser<'a> {
     lexer: std::iter::Peekable<Lexer<'a>>,
-    symtable: HashMap<String, f32>, // Changed to owned String
+    // symtable: HashMap<String, f32>, // Changed to owned String
+    pub instructions: Vec<Instruction>,
 }
 
 impl<'a> Parser<'a> {
@@ -14,7 +15,8 @@ impl<'a> Parser<'a> {
 
         Self {
             lexer,
-            symtable: HashMap::new(),
+            // symtable: HashMap::new(),
+            instructions: Vec::new(),
         }
     }
 
@@ -28,8 +30,12 @@ impl<'a> Parser<'a> {
                 self.term();
 
                 match op {
-                    Some(Token::Add) => print!("+"),
-                    Some(Token::Subtract) => print!("-"),
+                    Some(Token::Add) => {
+                        self.instructions.push(Instruction::Add)
+                    }
+                    Some(Token::Subtract) => {
+                        self.instructions.push(Instruction::Subtract)
+                    }
                     _ => unreachable!(),
                 }
             }
@@ -49,8 +55,12 @@ impl<'a> Parser<'a> {
                 self.factor();
 
                 match op {
-                    Some(Token::Multiply) => print!("*"),
-                    Some(Token::Divide) => print!("/"),
+                    Some(Token::Multiply) => {
+                        self.instructions.push(Instruction::Multiply)
+                    }
+                    Some(Token::Divide) => {
+                        self.instructions.push(Instruction::Divide)
+                    }
                     _ => unreachable!(),
                 }
             }
@@ -63,12 +73,13 @@ impl<'a> Parser<'a> {
         let peek = self.lexer.peek();
         match peek {
             Some(Token::Integer(number)) => {
-                print!("{}", number);
+                self.instructions.push(Instruction::Push(*number));
                 self.lexer.next();
             }
             Some(Token::LeftParen) => {
                 self.lexer.next();
                 self.expr();
+                self.lexer.next(); // assume there's a closing bracket
             }
             _ => (),
         }
