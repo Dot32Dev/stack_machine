@@ -1,4 +1,13 @@
-use eframe::egui::ahash::HashMapExt;
+// use eframe::egui::ahash::HashMapExt;
+
+// currently, it's
+// expr = term +/- term
+// term = factor *// factor
+// we need
+// expr = term moreterms
+// moreterms = + term, - term, or empty
+// term = factor morefactors
+// morefactors = * factor, / factor, or empty
 
 use crate::{lexer::Lexer, token::Instruction, token::Token};
 // use std::collections::HashMap;
@@ -21,55 +30,40 @@ impl<'a> Parser<'a> {
     }
 
     pub fn expr(&mut self) {
-        // An expression is a term plus/minus another term
+        // An expression is a term with moreterms
         self.term();
-        let peek = self.lexer.peek();
-        match peek {
-            Some(Token::Add) | Some(Token::Subtract) => {
-                let op = self.lexer.next();
-                self.term();
-
-                match op {
-                    Some(Token::Add) => {
-                        self.instructions.push(Instruction::Add)
-                    }
-                    Some(Token::Subtract) => {
-                        self.instructions.push(Instruction::Subtract)
-                    }
-                    _ => unreachable!(),
-                }
-            }
-            _ => (),
-        }
+        self.more_terms();
     }
 
-    fn term(&mut self) {
-        // A term is a thingmo multiplied/divided by another thingmo
-        // a thingmo can be a brackets thing
-
+    pub fn term(&mut self) {
+        // A term is a factor with morefactors
         self.factor();
+        self.more_factors();
+    }
+
+    pub fn more_terms(&mut self) {
+        // More terms is a plus/minus with a term and then another moreterms
+        // Can also be empty
         let peek = self.lexer.peek();
         match peek {
-            Some(Token::Multiply) | Some(Token::Divide) => {
-                let op = self.lexer.next();
-                self.factor();
-
-                match op {
-                    Some(Token::Multiply) => {
-                        self.instructions.push(Instruction::Multiply)
-                    }
-                    Some(Token::Divide) => {
-                        self.instructions.push(Instruction::Divide)
-                    }
-                    _ => unreachable!(),
-                }
+            Some(Token::Add) => {
+                self.lexer.next();
+                self.term();
+                self.more_terms();
+                self.instructions.push(Instruction::Add)
+            }
+            Some(Token::Subtract) => {
+                self.lexer.next();
+                self.term();
+                self.more_terms();
+                self.instructions.push(Instruction::Subtract)
             }
             _ => (),
         }
     }
 
-    fn factor(&mut self) {
-        // we lookin for a number or an opening bracket
+    pub fn factor(&mut self) {
+        // A factor is a number or brackets with an expression inside
         let peek = self.lexer.peek();
         match peek {
             Some(Token::Integer(number)) => {
@@ -79,7 +73,30 @@ impl<'a> Parser<'a> {
             Some(Token::LeftParen) => {
                 self.lexer.next();
                 self.expr();
-                self.lexer.next(); // assume there's a closing bracket
+                // Assume there's a closing bracket
+                // TODO: Error checking
+                self.lexer.next();
+            }
+            _ => (),
+        }
+    }
+
+    pub fn more_factors(&mut self) {
+        // More factors is a mul/div with a factor and then another morefactors
+        // Can also be empty
+        let peek = self.lexer.peek();
+        match peek {
+            Some(Token::Multiply) => {
+                self.lexer.next();
+                self.factor();
+                self.more_factors();
+                self.instructions.push(Instruction::Multiply)
+            }
+            Some(Token::Divide) => {
+                self.lexer.next();
+                self.factor();
+                self.more_factors();
+                self.instructions.push(Instruction::Divide)
             }
             _ => (),
         }
