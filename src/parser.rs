@@ -1,14 +1,5 @@
 // use eframe::egui::ahash::HashMapExt;
 
-// currently, it's
-// expr = term +/- term
-// term = factor *// factor
-// we need
-// expr = term moreterms
-// moreterms = + term, - term, or empty
-// term = factor morefactors
-// morefactors = * factor, / factor, or empty
-
 use crate::{lexer::Lexer, token::Instruction, token::Token};
 // use std::collections::HashMap;
 
