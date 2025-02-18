@@ -40,14 +40,14 @@ impl<'a> Parser<'a> {
             Some(Token::Add) => {
                 self.lexer.next();
                 self.term();
+                self.instructions.push(Instruction::Add);
                 self.more_terms();
-                self.instructions.push(Instruction::Add)
             }
             Some(Token::Subtract) => {
                 self.lexer.next();
                 self.term();
+                self.instructions.push(Instruction::Subtract);
                 self.more_terms();
-                self.instructions.push(Instruction::Subtract)
             }
             _ => (),
         }
@@ -80,14 +80,14 @@ impl<'a> Parser<'a> {
             Some(Token::Multiply) => {
                 self.lexer.next();
                 self.factor();
+                self.instructions.push(Instruction::Multiply);
                 self.more_factors();
-                self.instructions.push(Instruction::Multiply)
             }
             Some(Token::Divide) => {
                 self.lexer.next();
                 self.factor();
+                self.instructions.push(Instruction::Divide);
                 self.more_factors();
-                self.instructions.push(Instruction::Divide)
             }
             _ => (),
         }
