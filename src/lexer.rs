@@ -1,25 +1,35 @@
 use crate::token::Token;
 use std::iter::Peekable;
+use std::mem;
 
 pub struct Lexer<'a> {
     chars: Peekable<std::str::Chars<'a>>,
     line_number: u32,
+    token: Option<Token>,
 }
 
 impl<'a> Lexer<'a> {
     pub fn new(content: &'a String) -> Self {
-        let chars = content.chars().peekable();
-        Lexer {
-            chars,
+        let mut lexer = Lexer {
+            chars: content.chars().peekable(),
             line_number: 1,
-        }
+            token: None,
+        };
+        lexer.token = lexer.get_token();
+        lexer
     }
-}
 
-impl<'a> Iterator for Lexer<'a> {
-    type Item = Token;
+    pub fn next(&mut self) -> Option<Token> {
+        let token = self.get_token();
+        // Moves `token` into `self.token` and returns what used to be in there
+        mem::replace(&mut self.token, token)
+    }
 
-    fn next(&mut self) -> Option<Self::Item> {
+    pub fn peek(&mut self) -> Option<&Token> {
+        self.token.as_ref()
+    }
+
+    fn get_token(&mut self) -> Option<Token> {
         while let Some(ch) = self.chars.next() {
             match ch {
                 // Increment line count, then skip
@@ -40,7 +50,7 @@ impl<'a> Iterator for Lexer<'a> {
                                 integer.push(ch);
                             }
                             Some(_) => break 'number,
-                            None => break 'number
+                            None => break 'number,
                         }
                     }
                     let value = integer.parse::<i32>().unwrap();
@@ -56,7 +66,7 @@ impl<'a> Iterator for Lexer<'a> {
                                 variable.push(ch);
                             }
                             Some(_) => break 'var,
-                            None => break 'var
+                            None => break 'var,
                         }
                     }
                     return Some(Token::Variable(variable));

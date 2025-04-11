@@ -4,14 +4,14 @@ use crate::{lexer::Lexer, token::Instruction, token::Token};
 // use std::collections::HashMap;
 
 pub struct Parser<'a> {
-    lexer: std::iter::Peekable<Lexer<'a>>,
+    lexer: Lexer<'a>,
     // symtable: HashMap<String, f32>, // Changed to owned String
     pub instructions: Vec<Instruction>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(content: &'a String) -> Self {
-        let lexer = Lexer::new(content).peekable();
+        let lexer = Lexer::new(content);
 
         Self {
             lexer,
