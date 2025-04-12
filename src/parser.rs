@@ -1,11 +1,7 @@
-// use eframe::egui::ahash::HashMapExt;
-
 use crate::{lexer::Lexer, token::Instruction, token::Token};
-// use std::collections::HashMap;
 
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
-    // symtable: HashMap<String, f32>, // Changed to owned String
     pub instructions: Vec<Instruction>,
 }
 
@@ -15,7 +11,6 @@ impl<'a> Parser<'a> {
 
         Self {
             lexer,
-            // symtable: HashMap::new(),
             instructions: Vec::new(),
         }
     }
